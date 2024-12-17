@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tillgängliga Webbkomponenter</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    #accessibleModal, #accessibleDialog {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #accessibleModal .modal-content, #accessibleDialog .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 500px;
+    }
+    #accessibleModal button, #accessibleDialog button {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #accessibleModal button:focus, #accessibleDialog button:focus {
+      outline: 2px solid #ffbf47;
+    }
+
+    #menuContent {
+      display: none;
+      background-color: #333;
+      padding: 10px;
+    }
+    #menuContent ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #menuContent li {
+      padding: 10px;
+    }
+    #menuContent li a {
+      text-decoration: none;
+      color: white;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button id="openModalBtn" aria-expanded="false" aria-controls="accessibleModal">Öppna Modal</button>
+    <button id="openDialogBtn" aria-expanded="false" aria-controls="accessibleDialog">Öppna Dialog</button>
+    <button id="menuButton" aria-expanded="false" aria-controls="menuContent">Meny</button>
+  </header>
+
+  <main>
+    <section id="accessibleModal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+      <div class="modal-content">
+        <h2 id="modalTitle">Exempel på modalfönster</h2>
+        <p>Här är lite text i modalfönstret.</p>
+        <button id="closeModalBtn">Stäng</button>
+      </div>
+    </section>
+
+    <!-- 3st Fördelar med att använda <dialog>:
+     1. Enkel att använda: Den kräver mindre JavaScript för att hantera öppning och stängning och detta förenklar implementeringen.
+     2. Tillgänglighet: En annan fördel med att använda <dialog> är att den är designad för att vara tillgänglig och fungerar bra med skärmläsare.
+     3. Förbättrad användarupplevelse: En sista fördel är automatisk fokus som gör det lättare för användare att fokusera på innehållet direkt när modalen öppnas. -->
+    <dialog id="accessibleDialog" aria-labelledby="dialogTitle" aria-hidden="true">
+      <div class="modal-content">
+        <h2 id="dialogTitle">Exempel på tillgängligt modalfönster med &lt;dialog&gt;</h2>
+        <p>Här är innehållet i modalfönstret.</p>
+        <button id="closeDialogBtn" aria-label="Stäng dialog">Stäng</button>
+      </div>
+    </dialog>
+
+    <nav id="menuContent" role="navigation" aria-hidden="true">
+      <ul>
+        <li><a href="#">Hem</a></li>
+        <li><a href="#">Om oss</a></li>
+        <li><a href="#">Tjänster</a></li>
+        <li><a href="#">Kontakt</a></li>
+      </ul>
+    </nav>
+  </main>
+
+  <script>
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const accessibleModal = document.getElementById('accessibleModal');
+    openModalBtn.addEventListener('click', () => {
+      accessibleModal.style.display = 'flex';
+      accessibleModal.setAttribute('aria-hidden', 'false');
+      closeModalBtn.focus();
+      openModalBtn.setAttribute('aria-expanded', 'true');
+    });
+    closeModalBtn.addEventListener('click', () => {
+      accessibleModal.style.display = 'none';
+      accessibleModal.setAttribute('aria-hidden', 'true');
+      openModalBtn.focus();
+      openModalBtn.setAttribute('aria-expanded', 'false');
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && accessibleModal.style.display === 'flex') {
+        closeModalBtn.click();
+      }
+    });
+
+    const openDialogBtn = document.getElementById('openDialogBtn');
+    const closeDialogBtn = document.getElementById('closeDialogBtn');
+    const accessibleDialog = document.getElementById('accessibleDialog');
+    openDialogBtn.addEventListener('click', () => {
+      accessibleDialog.showModal();
+      accessibleDialog.setAttribute('aria-hidden', 'false');
+      closeDialogBtn.focus();
+      openDialogBtn.setAttribute('aria-expanded', 'true');
+    });
+    closeDialogBtn.addEventListener('click', () => {
+      accessibleDialog.close();
+      accessibleDialog.setAttribute('aria-hidden', 'true');
+      openDialogBtn.focus();
+      openDialogBtn.setAttribute('aria-expanded', 'false');
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && accessibleDialog.open) {
+        closeDialogBtn.click();
+      }
+    });
+
+    const menuButton = document.getElementById('menuButton');
+    const menuContent = document.getElementById('menuContent');
+    menuButton.addEventListener('click', () => {
+      const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+      menuButton.setAttribute('aria-expanded', !isExpanded);
+      menuContent.style.display = isExpanded ? 'none' : 'block';
+      menuContent.setAttribute('aria-hidden', isExpanded);
+
+      if (!isExpanded) {
+        menuContent.querySelector('a').focus();
+        menuContent.setAttribute('aria-live', 'assertive');
+      } else {
+        menuButton.focus();
+        menuContent.removeAttribute('aria-live');
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (menuContent.style.display === 'block') {
+        const focusableMenuItems = menuContent.querySelectorAll('a');
+        const firstMenuItem = focusableMenuItems[0];
+        const lastMenuItem = focusableMenuItems[focusableMenuItems.length - 1];
+
+        if (event.key === 'Tab') {
+          if (event.shiftKey) { 
+            if (document.activeElement === firstMenuItem) {
+              lastMenuItem.focus();
+              event.preventDefault();
+            }
+          } else { 
+            if (document.activeElement === lastMenuItem) {
+              firstMenuItem.focus();
+              event.preventDefault();
+            }
+          }
+        } else if (event.key === 'Escape') {
+          menuButton.click();
+        }
+      }
+    });
+
+    const modalContent = document.querySelector('.modal-content');
+    const focusableElements = modalContent.querySelectorAll('button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusableElement = focusableElements[0];
+    const lastFocusableElement = focusableElements[focusableElements.length - 1];
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Tab' && accessibleModal.style.display === 'flex') {
+        if (event.shiftKey) { 
+          if (document.activeElement === firstFocusableElement) {
+            lastFocusableElement.focus();
+            event.preventDefault();
+          }
+        } else {
+          if (document.activeElement === lastFocusableElement) {
+            firstFocusableElement.focus();
+            event.preventDefault();
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
